@@ -14,7 +14,28 @@ export default function AddTransaction({ onAdded, editingTransaction, onCancelEd
   useEffect(() => {
     if (editingTransaction) {
       // Format date for input (YYYY-MM-DD)
-      const dateStr = editingTransaction.date ? new Date(editingTransaction.date).toISOString().split('T')[0] : "";
+      // Avoid timezone issues by working directly with the date string
+      let dateStr = "";
+      if (editingTransaction.date) {
+        console.log("Original date value:", editingTransaction.date);
+        console.log("Date type:", typeof editingTransaction.date);
+        
+        const dateValue = editingTransaction.date.toString();
+        console.log("Date as string:", dateValue);
+        
+        // If already in YYYY-MM-DD format, use as-is
+        if (dateValue.includes('T') || dateValue.includes('Z')) {
+          // ISO format with timezone - convert to local date
+          const date = new Date(dateValue);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          dateStr = `${year}-${month}-${day}`;
+        }
+        
+        console.log("Final dateStr:", dateStr);
+      }
+      
       setForm({
         date: dateStr,
         type: editingTransaction.type || "expense",
